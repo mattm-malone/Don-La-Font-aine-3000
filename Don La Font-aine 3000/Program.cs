@@ -15,16 +15,14 @@ namespace Don_La_Font_aine_3000
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
-        {
-
-            //Jessica was here 
+        static void Main() {
+            //Matt was here
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Form form = new Form();
-            form.Text = "Image Viewer";
+            form.Text = "Don La Font-aine 3000";
             PictureBox pictureBox = new PictureBox();
-            string directory = System.IO.Path.GetDirectoryName(Application.ExecutablePath)s
+            string directory = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
 
             var starwars = new PrivateFontCollection();
             // Provide the path to the font on the filesystem
