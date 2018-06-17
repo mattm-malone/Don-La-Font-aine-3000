@@ -23,13 +23,14 @@ namespace Don_La_Font_aine_3000
             Form form = new Form();
             form.Text = "Don La Font-aine 3000";
             PictureBox pictureBox = new PictureBox();
-            string directory = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+            string startupPath = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.FullName;
+            string swFontPath = startupPath + "\\fonts\\Starjout.ttf";
 
             var starwars = new PrivateFontCollection();
             // Provide the path to the font on the filesystem
-            starwars.AddFontFile(@"C:\Users\Matt\source\repos\Don La Font-aine 3000\Don La Font-aine 3000\bin\fonts\Starjout.ttf");
+            starwars.AddFontFile(@swFontPath);
 
-            var spaceFont = new Font((FontFamily)starwars.Families[0], 18f);
+            var spaceFont = new Font((FontFamily)starwars.Families[0], 14f);
 
             Bitmap img = DrawFilledRectangle(300, 300);
             Graphics g = Graphics.FromImage(img);
@@ -37,7 +38,7 @@ namespace Don_La_Font_aine_3000
             g.SmoothingMode = SmoothingMode.None;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            g.DrawString("ok we get it", spaceFont, Brushes.Yellow, 50, 100);
+            g.DrawString("Hello World", spaceFont, Brushes.Yellow, 50, 100);
 
             g.Flush();
             pictureBox.Image = img;
