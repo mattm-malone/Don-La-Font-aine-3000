@@ -21,43 +21,31 @@ namespace Don_La_Font_aine_3000
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Form form = new Form();
-
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-
             form.Text = "Don La Font-aine 3000";
             PictureBox pictureBox = new PictureBox();
             string startupPath = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.FullName;
-            string swFontPath = startupPath + "\\fonts\\Starjout.ttf";
+            string swFontPath = startupPath + "\\fonts\\horror1.ttf";
+            string input = Microsoft.VisualBasic.Interaction.InputBox("What is your movie title?", "Don La Font-aine 3000", "", -1, -1);
 
             var starwars = new PrivateFontCollection();
             // Provide the path to the font on the filesystem
             starwars.AddFontFile(@swFontPath);
 
-            var spaceFont = new Font((FontFamily)starwars.Families[0], 14f);
+            var spaceFont = new Font((FontFamily)starwars.Families[0], 24f);
 
             Bitmap img = DrawFilledRectangle(300, 300);
             Graphics g = Graphics.FromImage(img);
 
-            
-
-            g.SmoothingMode = SmoothingMode.None;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            g.DrawString("Hello World", spaceFont, Brushes.Yellow, 50, 100);
-            
-            if (stopwatch.Elapsed.Milliseconds>=40 )
-            {
-                stopwatch.Stop();
-                g.Clear(Color.Tomato);
-               
-            }
+            g.DrawString(input, spaceFont, Brushes.Red, 0, 100);
+
             g.Flush();
             pictureBox.Image = img;
             pictureBox.Dock = DockStyle.Fill;
             form.Controls.Add(pictureBox);
             Application.Run(form);
-           
         }
 
         public static Bitmap DrawFilledRectangle(int x, int y)
