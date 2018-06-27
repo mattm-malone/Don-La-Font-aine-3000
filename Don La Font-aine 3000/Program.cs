@@ -21,6 +21,10 @@ namespace Don_La_Font_aine_3000
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Form form = new Form();
+
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+
             form.Text = "Don La Font-aine 3000";
             PictureBox pictureBox = new PictureBox();
             string startupPath = System.IO.Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.FullName;
@@ -35,16 +39,25 @@ namespace Don_La_Font_aine_3000
             Bitmap img = DrawFilledRectangle(300, 300);
             Graphics g = Graphics.FromImage(img);
 
+            
+
             g.SmoothingMode = SmoothingMode.None;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.DrawString("Hello World", spaceFont, Brushes.Yellow, 50, 100);
-
+            
+            if (stopwatch.Elapsed.Milliseconds>=40 )
+            {
+                stopwatch.Stop();
+                g.Clear(Color.Tomato);
+               
+            }
             g.Flush();
             pictureBox.Image = img;
             pictureBox.Dock = DockStyle.Fill;
             form.Controls.Add(pictureBox);
             Application.Run(form);
+           
         }
 
         public static Bitmap DrawFilledRectangle(int x, int y)
