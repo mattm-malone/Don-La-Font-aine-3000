@@ -40,7 +40,7 @@ namespace Don_La_Font_aine_3000
             g.SmoothingMode = SmoothingMode.AntiAlias;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            g.DrawString(input, spaceFont, Brushes.Yellow, 0, 100);
+            g.DrawString(input, spaceFont, randomColorGen(), 0, 100);
 
             g.Flush();
             pictureBox.Image = img;
@@ -57,6 +57,26 @@ namespace Don_La_Font_aine_3000
                 graph.FillRectangle(Brushes.Black, ImageSize);
             }
             return bmp;
+        }
+
+        public static Brush randomColorGen()
+        {
+            Random numRand = new Random();
+            Brush colorChosen = null;
+            int colorChooser = numRand.Next(1, 3);
+            if (colorChooser == 1)
+            {
+                colorChosen = Brushes.AliceBlue;
+            }
+            else if (colorChooser == 2)
+            {
+                colorChosen = Brushes.AntiqueWhite;
+            }
+            else if (colorChooser == 3)
+            {
+                colorChosen = Brushes.Chocolate;
+            }
+            return colorChosen;
         }
 
         public static string getRandomFontFile(string directory) {
