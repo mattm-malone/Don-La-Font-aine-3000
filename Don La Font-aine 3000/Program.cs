@@ -42,11 +42,12 @@ namespace Don_La_Font_aine_3000
             var imgFont = new PrivateFontCollection();
             imgFont.AddFontFile(@fontPath);
             Font selectedFont = new Font((FontFamily)imgFont.Families[0], getBestFontSize(g, input, imgFont, img.Width));
+            int widthOfString = (int)(g.MeasureString(input, selectedFont).Width);
 
-            Color contrastingColor = getContrastingColor(img);
+            Color averageColor = getAverageColorOfArea(img, ((img.Width - widthOfString) / 2), ((img.Width - widthOfString) / 2) + widthOfString, 100, 100 + (int)(g.MeasureString(input, selectedFont).Height));
+            Color contrastingColor = findContrastingColor(averageColor);
             Brush fontColor = new SolidBrush(contrastingColor);
 
-            int widthOfString = (int)(g.MeasureString(input, selectedFont).Width);
             
             // Draws the string in the center of image.
             g.DrawString(input, selectedFont, fontColor, (img.Width-widthOfString)/2, 100);
@@ -112,7 +113,7 @@ namespace Don_La_Font_aine_3000
             {
                 var di = new DirectoryInfo(directory);
                 var rgFiles = di.GetFiles("*.*").Where(f => extensions.Contains(f.Extension.ToLower()));
-                Random R = new Random();
+                Random R = new Random((int.Parse(Guid.NewGuid().ToString().Substring(0, 8), System.Globalization.NumberStyles.HexNumber)));
                 file = rgFiles.ElementAt(R.Next(0, rgFiles.Count())).FullName;
             }
             catch { }
@@ -128,14 +129,14 @@ namespace Don_La_Font_aine_3000
             {
                 var di = new DirectoryInfo(directory);
                 var rgFiles = di.GetFiles("*.*").Where(f => extensions.Contains(f.Extension.ToLower()));
-                Random R = new Random();
+                Random R = new Random((int.Parse(Guid.NewGuid().ToString().Substring(0, 8), System.Globalization.NumberStyles.HexNumber)));
                 file = rgFiles.ElementAt(R.Next(0, rgFiles.Count())).FullName;
             }
             catch { }
             return file;
         }
 
-        public static Color getContrastingColor(Bitmap bmp)
+        public static Color getAverageColorOfArea(Bitmap bmp, int x0, int x1, int y0, int y1)
         {
             //Used for tally
             int r = 0;
@@ -143,9 +144,9 @@ namespace Don_La_Font_aine_3000
             int b = 0;
             int total = 0;
 
-            for (int x = 0; x < bmp.Width; x++)
+            for (int x = x0; x < x1; x++)
             {
-                for (int y = 0; y < bmp.Height; y++)
+                for (int y = y0; y < y1; y++)
                 {
                     Color clr = bmp.GetPixel(x, y);
                     r += clr.R;
@@ -159,26 +160,121 @@ namespace Don_La_Font_aine_3000
             r /= total;
             g /= total;
             b /= total;
-
-            //r += 128;
-            //if (r > 255) r -= 256;
-
-            //g += 128;
-            //if (g > 255) g -= 256;
-
-            //b += 128;
-            //if (b > 255) b -= 256;
-
-            //Inverses the average
-            r = 255 - r;
-            g = 255 - g;
-            b = 255 - b;
-
             return Color.FromArgb(r, g, b);
         }
 
+        /// <summary>
+        /// Returns a complementary or contrasting color to make the drawn string
+        /// contrast against the background.
+        /// </summary>
+        /// <returns></returns>
+        public static Color findContrastingColor(Color baseColor)
+        {
+            // First convert to HSB
+            float hue, saturation, brightness;
+            float[] hsbvals = new float[3];
+            Color contrast;
 
+            int cmax = (baseColor.R > baseColor.G) ? baseColor.R : baseColor.G;
+            if (baseColor.B > cmax) cmax = baseColor.B;
+            int cmin = (baseColor.R < baseColor.G) ? baseColor.R : baseColor.G;
+            if (baseColor.B < cmin) cmin = baseColor.B;
 
+            brightness = cmax / 255.0f;
+            if (cmax != 0)
+            {
+                saturation = ((float)(cmax - cmin)) / ((float)cmax);
+            }
+            else
+            {
+                saturation = 0;
+            }
+
+            if (saturation == 0)
+            {
+                hue = 0;
+            }
+            else
+            {
+                float redc = ((float)(cmax - baseColor.R)) / ((float)(cmax - cmin));
+                float greenc = ((float)(cmax - baseColor.G)) / ((float)(cmax - cmin));
+                float bluec = ((float)(cmax - baseColor.B)) / ((float)(cmax - cmin));
+                if (baseColor.R == cmax)
+                {
+                    hue = bluec - greenc;
+                }
+                else if (baseColor.G == cmax)
+                {
+                    hue = 2.0f + redc - bluec;
+                }
+                else
+                {
+                    hue = 4.0f + greenc - redc;
+                }
+                hue = hue / 6.0f;
+                if (hue < 0)
+                {
+                    hue += 1.0f;
+                }
+            }
+            // Add 180 degrees to the hue.
+            hue = (hue + 0.5f);
+            if (hue > 1.0f)
+            {
+                hue -= 1.0f;
+            }
+            brightness = 1.0f - brightness;
+
+            // Now we have our final hsb, then convert back.
+            int r = 0, g = 0, b = 0;
+
+            if (saturation == 0)
+            {
+                r = g = b = (int)(brightness * 255.0f + 0.5f);
+            }
+            else
+            {
+                float h = (hue - (float)Math.Floor(hue)) * 0.6f;
+                float f = h - (float)Math.Floor(h);
+                float p = brightness * (1.0f - saturation);
+                float q = brightness * (1.0f - saturation * f);
+                float t = brightness * (1.0f - (saturation * (1.0f - f)));
+                switch ((int)h)
+                {
+                    case 0:
+                        r = (int)(brightness * 255.0f + 0.5f);
+                        g = (int)(t * 255.0f + 0.5f);
+                        b = (int)(p * 255.0f + 0.5f);
+                        break;
+                    case 1:
+                        r = (int)(q * 255.0f + 0.5f);
+                        g = (int)(brightness * 255.0f + 0.5f);
+                        b = (int)(p * 255.0f + 0.5f);
+                        break;
+                    case 2:
+                        r = (int)(p * 255.0f + 0.5f);
+                        g = (int)(brightness * 255.0f + 0.5f);
+                        b = (int)(t * 255.0f + 0.5f);
+                        break;
+                    case 3:
+                        r = (int)(p * 255.0f + 0.5f);
+                        g = (int)(q * 255.0f + 0.5f);
+                        b = (int)(brightness * 255.0f + 0.5f);
+                        break;
+                    case 4:
+                        r = (int)(t * 255.0f + 0.5f);
+                        g = (int)(p * 255.0f + 0.5f);
+                        b = (int)(brightness * 255.0f + 0.5f);
+                        break;
+                    case 5:
+                        r = (int)(brightness * 255.0f + 0.5f);
+                        g = (int)(p * 255.0f + 0.5f);
+                        b = (int)(q * 255.0f + 0.5f);
+                        break;
+                }
+            }
+            return Color.FromArgb(r, g, b);
+        }
     }
 
 }
